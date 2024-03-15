@@ -66,6 +66,7 @@ export const BlueDefaultTheme = {
     receiveBackground: '#D1F9D6',
     receiveText: '#37C0A1',
     navigationBarColor: '#FFFFFF',
+    blue: '#4A6FF5'
   },
 };
 

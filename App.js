@@ -1,5 +1,5 @@
-import 'react-native-gesture-handler'; // should be on top
-import React, { useContext, useEffect, useRef } from 'react';
+import "react-native-gesture-handler"; // should be on top
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 import {
   AppState,
   NativeModules,
@@ -11,41 +11,54 @@ import {
   useColorScheme,
   View,
   LogBox,
-} from 'react-native';
-import { NavigationContainer, CommonActions } from '@react-navigation/native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { navigationRef } from './NavigationService';
-import * as NavigationService from './NavigationService';
-import { Chain } from './models/bitcoinUnits';
-import DeeplinkSchemaMatch from './class/deeplink-schema-match';
-import loc from './loc';
-import { BlueDefaultTheme, BlueDarkTheme } from './components/themes';
-import InitRoot from './Navigation';
-import BlueClipboard from './blue_modules/clipboard';
-import { BlueStorageContext } from './blue_modules/storage-context';
-import WatchConnectivity from './WatchConnectivity';
-import DeviceQuickActions from './class/quick-actions';
-import Notifications from './blue_modules/notifications';
-import Biometric from './class/biometrics';
-import WidgetCommunication from './blue_modules/WidgetCommunication';
-import ActionSheet from './screen/ActionSheet';
-import HandoffComponent from './components/handoff';
-import triggerHapticFeedback, { HapticFeedbackTypes } from './blue_modules/hapticFeedback';
-import MenuElements from './components/MenuElements';
-import { updateExchangeRate } from './blue_modules/currency';
-const A = require('./blue_modules/analytics');
+} from "react-native";
+import { NavigationContainer, CommonActions } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { navigationRef } from "./NavigationService";
+import * as NavigationService from "./NavigationService";
+import { Chain } from "./models/bitcoinUnits";
+import DeeplinkSchemaMatch from "./class/deeplink-schema-match";
+import loc from "./loc";
+import { BlueDefaultTheme, BlueDarkTheme } from "./components/themes";
+import InitRoot from "./Navigation";
+import BlueClipboard from "./blue_modules/clipboard";
+import { BlueStorageContext } from "./blue_modules/storage-context";
+import WatchConnectivity from "./WatchConnectivity";
+import DeviceQuickActions from "./class/quick-actions";
+import Notifications from "./blue_modules/notifications";
+import Biometric from "./class/biometrics";
+import WidgetCommunication from "./blue_modules/WidgetCommunication";
+import ActionSheet from "./screen/ActionSheet";
+import Settings from "./screen/settings/Settings";
+import HandoffComponent from "./components/handoff";
+import triggerHapticFeedback, {
+  HapticFeedbackTypes,
+} from "./blue_modules/hapticFeedback";
+import MenuElements from "./components/MenuElements";
+import { updateExchangeRate } from "./blue_modules/currency";
+import { Icon } from "react-native-elements";
+import { Text } from "react-native";
+import ReceiveDetails from "./screen/receive/details";
+const A = require("./blue_modules/analytics");
 
-const eventEmitter = Platform.OS === 'ios' ? new NativeEventEmitter(NativeModules.EventEmitter) : undefined;
+const eventEmitter =
+  Platform.OS === "ios"
+    ? new NativeEventEmitter(NativeModules.EventEmitter)
+    : undefined;
 const { EventEmitter, SplashScreen } = NativeModules;
 
-LogBox.ignoreLogs(['Require cycle:', 'Battery state `unknown` and monitoring disabled, this is normal for simulators and tvOS.']);
+LogBox.ignoreLogs([
+  "Require cycle:",
+  "Battery state `unknown` and monitoring disabled, this is normal for simulators and tvOS.",
+]);
 
 const ClipboardContentType = Object.freeze({
-  BITCOIN: 'BITCOIN',
-  LIGHTNING: 'LIGHTNING',
+  BITCOIN: "BITCOIN",
+  LIGHTNING: "LIGHTNING",
 });
 
-if (Platform.OS === 'android') {
+if (Platform.OS === "android") {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
   }
@@ -65,9 +78,10 @@ const App = () => {
   const clipboardContent = useRef();
   const colorScheme = useColorScheme();
 
-  const onNotificationReceived = async notification => {
+  const onNotificationReceived = async (notification) => {
     const payload = Object.assign({}, notification, notification.data);
-    if (notification.data && notification.data.data) Object.assign(payload, notification.data.data);
+    if (notification.data && notification.data.data)
+      Object.assign(payload, notification.data.data);
     payload.foreground = true;
 
     await Notifications.addNotification(payload);
@@ -76,19 +90,19 @@ const App = () => {
     if (payload.foreground) await processPushNotifications();
   };
 
-  const onUserActivityOpen = data => {
+  const onUserActivityOpen = (data) => {
     switch (data.activityType) {
       case HandoffComponent.activityTypes.ReceiveOnchain:
-        NavigationService.navigate('ReceiveDetailsRoot', {
-          screen: 'ReceiveDetails',
+        NavigationService.navigate("ReceiveDetailsRoot", {
+          screen: "ReceiveDetails",
           params: {
             address: data.userInfo.address,
           },
         });
         break;
       case HandoffComponent.activityTypes.Xpub:
-        NavigationService.navigate('WalletXpubRoot', {
-          screen: 'WalletXpub',
+        NavigationService.navigate("WalletXpubRoot", {
+          screen: "WalletXpub",
           params: {
             xpub: data.userInfo.xpub,
           },
@@ -107,18 +121,18 @@ const App = () => {
   }, [walletsInitialized]);
 
   const addListeners = () => {
-    Linking.addEventListener('url', handleOpenURL);
-    AppState.addEventListener('change', handleAppStateChange);
+    Linking.addEventListener("url", handleOpenURL);
+    AppState.addEventListener("change", handleAppStateChange);
     EventEmitter?.getMostRecentUserActivity()
       .then(onUserActivityOpen)
-      .catch(() => console.log('No userActivity object sent'));
+      .catch(() => console.log("No userActivity object sent"));
     handleAppStateChange(undefined);
     /*
       When a notification on iOS is shown while the app is on foreground;
       On willPresent on AppDelegate.m
      */
-    eventEmitter?.addListener('onNotificationReceived', onNotificationReceived);
-    eventEmitter?.addListener('onUserActivityOpen', onUserActivityOpen);
+    eventEmitter?.addListener("onNotificationReceived", onNotificationReceived);
+    eventEmitter?.addListener("onUserActivityOpen", onUserActivityOpen);
   };
 
   /**
@@ -129,31 +143,38 @@ const App = () => {
    */
   const processPushNotifications = async () => {
     if (!walletsInitialized) {
-      console.log('not processing push notifications because wallets are not initialized');
+      console.log(
+        "not processing push notifications because wallets are not initialized"
+      );
       return;
     }
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
     // sleep needed as sometimes unsuspend is faster than notification module actually saves notifications to async storage
     const notifications2process = await Notifications.getStoredNotifications();
 
     await Notifications.clearStoredNotifications();
     Notifications.setApplicationIconBadgeNumber(0);
-    const deliveredNotifications = await Notifications.getDeliveredNotifications();
+    const deliveredNotifications =
+      await Notifications.getDeliveredNotifications();
     setTimeout(() => Notifications.removeAllDeliveredNotifications(), 5000); // so notification bubble wont disappear too fast
 
     for (const payload of notifications2process) {
-      const wasTapped = payload.foreground === false || (payload.foreground === true && payload.userInteraction);
+      const wasTapped =
+        payload.foreground === false ||
+        (payload.foreground === true && payload.userInteraction);
 
-      console.log('processing push notification:', payload);
+      console.log("processing push notification:", payload);
       let wallet;
       switch (+payload.type) {
         case 2:
         case 3:
-          wallet = wallets.find(w => w.weOwnAddress(payload.address));
+          wallet = wallets.find((w) => w.weOwnAddress(payload.address));
           break;
         case 1:
         case 4:
-          wallet = wallets.find(w => w.weOwnTransaction(payload.txid || payload.hash));
+          wallet = wallets.find((w) =>
+            w.weOwnTransaction(payload.txid || payload.hash)
+          );
           break;
       }
 
@@ -164,16 +185,16 @@ const App = () => {
           if (payload.type !== 3 || wallet.chain === Chain.OFFCHAIN) {
             NavigationService.dispatch(
               CommonActions.navigate({
-                name: 'WalletTransactions',
+                name: "WalletTransactions",
                 params: {
                   walletID,
                   walletType: wallet.type,
                 },
-              }),
+              })
             );
           } else {
-            NavigationService.navigate('ReceiveDetailsRoot', {
-              screen: 'ReceiveDetails',
+            NavigationService.navigate("ReceiveDetailsRoot", {
+              screen: "ReceiveDetails",
               params: {
                 walletID,
                 address: payload.address,
@@ -184,7 +205,9 @@ const App = () => {
           return true;
         }
       } else {
-        console.log('could not find wallet while processing push notification, NOP');
+        console.log(
+          "could not find wallet while processing push notification, NOP"
+        );
       }
     } // end foreach notifications loop
 
@@ -198,30 +221,45 @@ const App = () => {
     return false;
   };
 
-  const handleAppStateChange = async nextAppState => {
+  const handleAppStateChange = async (nextAppState) => {
     if (wallets.length === 0) return;
-    if ((appState.current.match(/background/) && nextAppState === 'active') || nextAppState === undefined) {
+    if (
+      (appState.current.match(/background/) && nextAppState === "active") ||
+      nextAppState === undefined
+    ) {
       setTimeout(() => A(A.ENUM.APP_UNSUSPENDED), 2000);
       updateExchangeRate();
       const processed = await processPushNotifications();
       if (processed) return;
       const clipboard = await BlueClipboard().getClipboardContent();
-      const isAddressFromStoredWallet = wallets.some(wallet => {
+      const isAddressFromStoredWallet = wallets.some((wallet) => {
         if (wallet.chain === Chain.ONCHAIN) {
           // checking address validity is faster than unwrapping hierarchy only to compare it to garbage
-          return wallet.isAddressValid && wallet.isAddressValid(clipboard) && wallet.weOwnAddress(clipboard);
+          return (
+            wallet.isAddressValid &&
+            wallet.isAddressValid(clipboard) &&
+            wallet.weOwnAddress(clipboard)
+          );
         } else {
-          return wallet.isInvoiceGeneratedByWallet(clipboard) || wallet.weOwnAddress(clipboard);
+          return (
+            wallet.isInvoiceGeneratedByWallet(clipboard) ||
+            wallet.weOwnAddress(clipboard)
+          );
         }
       });
       const isBitcoinAddress = DeeplinkSchemaMatch.isBitcoinAddress(clipboard);
-      const isLightningInvoice = DeeplinkSchemaMatch.isLightningInvoice(clipboard);
+      const isLightningInvoice =
+        DeeplinkSchemaMatch.isLightningInvoice(clipboard);
       const isLNURL = DeeplinkSchemaMatch.isLnUrl(clipboard);
-      const isBothBitcoinAndLightning = DeeplinkSchemaMatch.isBothBitcoinAndLightning(clipboard);
+      const isBothBitcoinAndLightning =
+        DeeplinkSchemaMatch.isBothBitcoinAndLightning(clipboard);
       if (
         !isAddressFromStoredWallet &&
         clipboardContent.current !== clipboard &&
-        (isBitcoinAddress || isLightningInvoice || isLNURL || isBothBitcoinAndLightning)
+        (isBitcoinAddress ||
+          isLightningInvoice ||
+          isLNURL ||
+          isBothBitcoinAndLightning)
       ) {
         let contentType;
         if (isBitcoinAddress) {
@@ -240,65 +278,137 @@ const App = () => {
     }
   };
 
-  const handleOpenURL = event => {
-    DeeplinkSchemaMatch.navigationRouteFor(event, value => NavigationService.navigate(...value), {
-      wallets,
-      addWallet,
-      saveToDisk,
-      setSharedCosigner,
-    });
+  const handleOpenURL = (event) => {
+    DeeplinkSchemaMatch.navigationRouteFor(
+      event,
+      (value) => NavigationService.navigate(...value),
+      {
+        wallets,
+        addWallet,
+        saveToDisk,
+        setSharedCosigner,
+      }
+    );
   };
 
   const showClipboardAlert = ({ contentType }) => {
     triggerHapticFeedback(HapticFeedbackTypes.ImpactLight);
     BlueClipboard()
       .getClipboardContent()
-      .then(clipboard => {
-        if (Platform.OS === 'ios' || Platform.OS === 'macos') {
+      .then((clipboard) => {
+        if (Platform.OS === "ios" || Platform.OS === "macos") {
           ActionSheet.showActionSheetWithOptions(
             {
               options: [loc._.cancel, loc._.continue],
               title: loc._.clipboard,
-              message: contentType === ClipboardContentType.BITCOIN ? loc.wallets.clipboard_bitcoin : loc.wallets.clipboard_lightning,
+              message:
+                contentType === ClipboardContentType.BITCOIN
+                  ? loc.wallets.clipboard_bitcoin
+                  : loc.wallets.clipboard_lightning,
               cancelButtonIndex: 0,
             },
-            buttonIndex => {
+            (buttonIndex) => {
               if (buttonIndex === 1) {
                 handleOpenURL({ url: clipboard });
               }
-            },
+            }
           );
         } else {
           ActionSheet.showActionSheetWithOptions({
             buttons: [
-              { text: loc._.cancel, style: 'cancel', onPress: () => {} },
+              { text: loc._.cancel, style: "cancel", onPress: () => {} },
               {
                 text: loc._.continue,
-                style: 'default',
+                style: "default",
                 onPress: () => {
                   handleOpenURL({ url: clipboard });
                 },
               },
             ],
             title: loc._.clipboard,
-            message: contentType === ClipboardContentType.BITCOIN ? loc.wallets.clipboard_bitcoin : loc.wallets.clipboard_lightning,
+            message:
+              contentType === ClipboardContentType.BITCOIN
+                ? loc.wallets.clipboard_bitcoin
+                : loc.wallets.clipboard_lightning,
           });
         }
       });
   };
 
   useEffect(() => {
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === "ios") {
       // Call hide to setup the listener on the native side
       SplashScreen?.addObserver();
     }
   }, []);
 
+  const WalletTabs = createBottomTabNavigator();
+  const TabApp = useCallback(() => {
+    return (
+      <WalletTabs.Navigator screenOptions={{ headerShown: false }}>
+        <WalletTabs.Screen
+          name="MyTab"
+          component={InitRoot}
+          options={{
+            title: ({ focused }) => {
+              return (
+                <View>
+                  <Text style={{ color: focused ? "#F7931A" : "#777777" }}>
+                    Home
+                  </Text>
+                </View>
+              );
+            },
+            tabBarIcon: ({ focused }) => {
+              console.log("focused:>>", focused);
+              return (
+                <Icon
+                  name="home"
+                  type="material"
+                  color={focused ? "#F7931A" : "#777777"}
+                />
+              );
+            },
+          }}
+        />
+        <WalletTabs.Screen
+          name="Settings"
+          component={Settings}
+          options={{
+            title: ({ focused }) => {
+              return (
+                <View>
+                  <Text style={{ color: focused ? "#F7931A" : "#777777" }}>
+                    Setting
+                  </Text>
+                </View>
+              );
+            },
+            tabBarIcon: ({ focused }) => {
+              console.log("focused:>>", focused);
+              return (
+                <Icon
+                  name="settings"
+                  type="material"
+                  color={focused ? "#F7931A" : "#777777"}
+                />
+              );
+            },
+          }}
+        />
+        <WalletTabs.Screen name="ReceiveDetails" component={ReceiveDetails} />
+      </WalletTabs.Navigator>
+    );
+  }, []);
+
   return (
     <SafeAreaProvider>
       <View style={styles.root}>
-        <NavigationContainer ref={navigationRef} theme={colorScheme === 'dark' ? BlueDarkTheme : BlueDefaultTheme}>
-          <InitRoot />
+        <NavigationContainer
+          ref={navigationRef}
+          theme={colorScheme === "dark" ? BlueDarkTheme : BlueDefaultTheme}
+        >
+          <TabApp />
           <Notifications onProcessNotifications={processPushNotifications} />
           <MenuElements />
           <DeviceQuickActions />

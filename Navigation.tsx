@@ -88,9 +88,13 @@ import LdkViewLogs from './screen/wallets/ldkViewLogs';
 import PaymentCode from './screen/wallets/paymentCode';
 import PaymentCodesList from './screen/wallets/paymentCodesList';
 import { BlueStorageContext } from './blue_modules/storage-context';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
+
+
+
 
 const WalletsStack = createNativeStackNavigator();
-
 const WalletsRoot = () => {
   const theme = useTheme();
 
@@ -107,7 +111,7 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="CPFP" component={CPFP} options={CPFP.navigationOptions(theme)} />
       <WalletsStack.Screen name="RBFBumpFee" component={RBFBumpFee} options={RBFBumpFee.navigationOptions(theme)} />
       <WalletsStack.Screen name="RBFCancel" component={RBFCancel} options={RBFCancel.navigationOptions(theme)} />
-      <WalletsStack.Screen name="Settings" component={Settings} options={Settings.navigationOptions(theme)} />
+      {/* <WalletsStack.Screen name="Settings" component={Settings} options={Settings.navigationOptions(theme)} /> */}
       <WalletsStack.Screen name="SelectWallet" component={SelectWallet} options={SelectWallet.navigationOptions(theme)} />
       <WalletsStack.Screen name="Currency" component={Currency} options={navigationStyle({ title: loc.settings.currency })(theme)} />
       <WalletsStack.Screen name="About" component={About} options={About.navigationOptions(theme)} />
@@ -568,6 +572,8 @@ const NavigationFormModalOptions: NativeStackNavigationOptions = {
   presentation: 'formSheet',
 };
 const StatusBarLightOptions: NativeStackNavigationOptions = { statusBarStyle: 'light' };
+const WalletTabs = createBottomTabNavigator();
+
 const Navigation = () => {
   return (
     <RootStack.Navigator initialRouteName="UnlockWithScreenRoot" screenOptions={{ headerShadowVisible: false, statusBarStyle: 'auto' }}>
