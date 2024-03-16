@@ -63,6 +63,7 @@ const WalletsList = () => {
     isElectrumDisabled,
     setReloadTransactionsMenuActionFunction,
   } = useContext(BlueStorageContext);
+  console.log('wallets:>>', wallets.concat(false));
   const { width } = useWindowDimensions();
   const { colors, scanImage } = useTheme();
   const { navigate, setOptions } = useNavigation();

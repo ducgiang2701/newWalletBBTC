@@ -40,6 +40,7 @@ import { updateExchangeRate } from "./blue_modules/currency";
 import { Icon } from "react-native-elements";
 import { Text } from "react-native";
 import ReceiveDetails from "./screen/receive/details";
+import SendDetails from "./screen/send/details";
 const A = require("./blue_modules/analytics");
 
 const eventEmitter =
@@ -372,6 +373,56 @@ const App = () => {
           }}
         />
         <WalletTabs.Screen
+          name="ReceiveDetails"
+          component={ReceiveDetails}
+          options={{
+            title: ({ focused }) => {
+              return (
+                <View>
+                  <Text style={{ color: focused ? "#F7931A" : "#777777" }}>
+                    Setting
+                  </Text>
+                </View>
+              );
+            },
+            tabBarIcon: ({ focused }) => {
+              console.log("focused:>>", focused);
+              return (
+                <Icon
+                  name="settings"
+                  type="material"
+                  color={focused ? "#F7931A" : "#777777"}
+                />
+              );
+            },
+          }}
+        />
+        <WalletTabs.Screen
+          name="SendDetails"
+          component={SendDetails}
+          options={{
+            title: ({ focused }) => {
+              return (
+                <View>
+                  <Text style={{ color: focused ? "#F7931A" : "#777777" }}>
+                    Send
+                  </Text>
+                </View>
+              );
+            },
+            tabBarIcon: ({ focused }) => {
+              console.log("focused:>>", focused);
+              return (
+                <Icon
+                  name="settings"
+                  type="material"
+                  color={focused ? "#F7931A" : "#777777"}
+                />
+              );
+            },
+          }}
+        />
+        <WalletTabs.Screen
           name="Settings"
           component={Settings}
           options={{
@@ -396,7 +447,6 @@ const App = () => {
             },
           }}
         />
-        <WalletTabs.Screen name="ReceiveDetails" component={ReceiveDetails} />
       </WalletTabs.Navigator>
     );
   }, []);

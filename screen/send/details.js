@@ -81,7 +81,9 @@ const SendDetails = () => {
   const [payjoinUrl, setPayjoinUrl] = useState(null);
   const [changeAddress, setChangeAddress] = useState();
   const [dumb, setDumb] = useState(false);
-  const { isEditable } = routeParams;
+  console.log(':routeParams:>>', routeParams);
+  // const { isEditable } = routeParams;
+  const isEditable = false
   // if utxo is limited we use it to calculate available balance
   const balance = utxo ? utxo.reduce((prev, curr) => prev + curr.value, 0) : wallet?.getBalance();
   const allBalance = formatBalanceWithoutSuffix(balance, BitcoinUnit.BTC, true);
@@ -132,7 +134,7 @@ const SendDetails = () => {
   useEffect(() => {
     // decode route params
     const currentAddress = addresses[scrollIndex.current];
-    if (routeParams.uri) {
+    if (routeParams?.uri) {
       try {
         const { address, amount, memo, payjoinUrl: pjUrl } = DeeplinkSchemaMatch.decodeBitcoinUri(routeParams.uri);
 
@@ -164,7 +166,7 @@ const SendDetails = () => {
         console.log(error);
         presentAlert({ title: loc.errors.error, message: loc.send.details_error_decode });
       }
-    } else if (routeParams.address) {
+    } else if (routeParams?.address) {
       const { amount, amountSats, unit = BitcoinUnit.BTC } = routeParams;
       setAddresses(addrs => {
         if (currentAddress) {
@@ -186,7 +188,7 @@ const SendDetails = () => {
       setAddresses([{ address: '', key: String(Math.random()) }]); // key is for the FlatList
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeParams.uri, routeParams.address]);
+  }, []);
 
   useEffect(() => {
     // check if we have a suitable wallet
@@ -196,7 +198,7 @@ const SendDetails = () => {
       navigation.goBack();
       return;
     }
-    const newWallet = (routeParams.walletID && wallets.find(w => w.getID() === routeParams.walletID)) || suitable[0];
+    const newWallet = (wallets[0].getID() && wallets.find(w => w.getID() === wallets[0].getID())) || suitable[0];
     setWallet(newWallet);
     setFeeUnit(newWallet.getPreferredBalanceUnit());
     setAmountUnit(newWallet.preferredBalanceUnit); // default for whole screen
@@ -237,7 +239,7 @@ const SendDetails = () => {
     // reset other values
     setUtxo(null);
     setChangeAddress(null);
-    setIsTransactionReplaceable(wallet.type === HDSegwitBech32Wallet.type && !routeParams.noRbf);
+    setIsTransactionReplaceable(wallet.type === HDSegwitBech32Wallet.type && !routeParams?.noRbf);
 
     // update wallet UTXO
     wallet

@@ -247,7 +247,7 @@ const SendDetailsRoot = () => {
         options={SendDetails.navigationOptions(theme)}
         initialParams={SendDetails.initialParams}
       />
-      <SendDetailsStack.Screen name="Confirm" component={Confirm} options={Confirm.navigationOptions(theme)} />
+      {/* <SendDetailsStack.Screen name="Confirm" component={Confirm} options={Confirm.navigationOptions(theme)} />
       <SendDetailsStack.Screen
         name="PsbtWithHardwareWallet"
         component={PsbtWithHardwareWallet}
@@ -269,7 +269,7 @@ const SendDetailsRoot = () => {
         }}
       />
       <SendDetailsStack.Screen name="SelectWallet" component={SelectWallet} options={SelectWallet.navigationOptions(theme)} />
-      <SendDetailsStack.Screen name="CoinControl" component={CoinControl} options={CoinControl.navigationOptions(theme)} />
+      <SendDetailsStack.Screen name="CoinControl" component={CoinControl} options={CoinControl.navigationOptions(theme)} /> */}
     </SendDetailsStack.Navigator>
   );
 };

@@ -41,9 +41,11 @@ import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/h
 import { fiatToBTC, satoshiToBTC } from '../../blue_modules/currency';
 
 const ReceiveDetails = () => {
-  const { walletID, address } = useRoute().params;
+  // const {  address } = useRoute().params;
+  
   const { wallets, saveToDisk, sleep, isElectrumDisabled, fetchAndSaveWalletTransactions } = useContext(BlueStorageContext);
-  const wallet = wallets.find(w => w.getID() === walletID);
+  const wallet = wallets[0];
+  const address = wallet.getAllExternalAddresses()[0]
   const [customLabel, setCustomLabel] = useState();
   const [customAmount, setCustomAmount] = useState();
   const [customUnit, setCustomUnit] = useState(BitcoinUnit.BTC);
@@ -176,7 +178,7 @@ const ReceiveDetails = () => {
               }),
             );
 
-            fetchAndSaveWalletTransactions(walletID);
+            // fetchAndSaveWalletTransactions(walletID);
           } else {
             // rare case, but probable. transaction evicted from mempool (maybe cancelled by the sender)
             setShowConfirmedBalance(false);
@@ -188,7 +190,7 @@ const ReceiveDetails = () => {
         console.log(error);
       }
     }, intervalMs);
-  }, [bip21encoded, address, initialConfirmed, initialUnconfirmed, intervalMs, fetchAndSaveWalletTransactions, walletID]);
+  }, [bip21encoded, address, initialConfirmed, initialUnconfirmed, intervalMs, fetchAndSaveWalletTransactions]);
 
   const renderConfirmedBalance = () => {
     return (
@@ -347,9 +349,9 @@ const ReceiveDetails = () => {
                 goBack();
                 navigate('WalletExportRoot', {
                   screen: 'WalletExport',
-                  params: {
-                    walletID: wallet.getID(),
-                  },
+                  // params: {
+                  //   walletID: wallet.getID(),
+                  // },
                 });
               },
             });
