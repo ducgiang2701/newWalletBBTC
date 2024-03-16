@@ -389,8 +389,8 @@ const App = () => {
               console.log("focused:>>", focused);
               return (
                 <Icon
-                  name="settings"
-                  type="material"
+                  name="download"
+                  type="octicon"
                   color={focused ? "#F7931A" : "#777777"}
                 />
               );
@@ -414,8 +414,8 @@ const App = () => {
               console.log("focused:>>", focused);
               return (
                 <Icon
-                  name="settings"
-                  type="material"
+                  name="upload"
+                  type="octicon"
                   color={focused ? "#F7931A" : "#777777"}
                 />
               );
